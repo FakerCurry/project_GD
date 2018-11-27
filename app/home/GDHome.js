@@ -18,7 +18,8 @@ import {
     ActivityIndicator,
     Alert,
     RefreshControl,
-    Modal
+    Modal,
+    AsyncStorage
 } from 'react-native';
 
 //第三方
@@ -59,56 +60,78 @@ export default class GDHome extends Component<Props> {
             loaded: false,
             refreshState: RefreshState.Idle,
             isRefreshing: false,
-            isModal:false
+            isModal: false
 
         };
+
+        this.data=[]
+
         //需要绑定
         this.fetchData = this.fetchData.bind(this)
     }
 
     //网络请求的方法
+    //type 0:普通请求    1：下拉刷新   2：上拉加载
     fetchData(type) {
-        let params={"count":10,"mall":"京东商城"};
+        let params ;
+        if (type === 2) {
+            //读取存储的id
+            AsyncStorage.getItem('lastID')
+                .then((value) => {
 
-        HTTPBase.post('http://guangdiu.com/api/getlist.php',params,{})
+
+                        params={"count": 10, "mall": "京东商城","sinceid":value};
+
+                })
+
+
+        }else {
+            params={"count": 10, "mall": "京东商城"};
+
+        }
+
+
+
+
+        HTTPBase.post('http://guangdiu.com/api/getlist.php', params, {})
             .then(responseData => {
 
 
                 if (type === 0) {
+                    this.data=responseData.data;
 
                     this.setState({
 
-                        dataSource: responseData.data,
+                        dataSource: this.data,
                         loaded: true
 
                     })
 
                 } else if (type === 1) {
 
-                    // this.setState({
-                    //     dataSource: responseData.data,
-                    //     refreshState: responseData.data.length < 1 ? RefreshState.EmptyData : RefreshState.Idle,
-                    //     loaded:true
-                    // })
+                    this.data=responseData.data;
+
 
                     this.setState({
-                        dataSource: responseData.data,
+                        dataSource: this.data,
                         isRefreshing: false,
                         loaded: true
                     })
 
                 } else {
 
-                    let result = this.state.dataSource;
-                    for (var i = 0; i < responseData.data.length; i++) {
-
-                        result.push(responseData.data[i]);
-
-                    }
+                    // let result = this.state.dataSource;
+                    // for (var i = 0; i < responseData.data.length; i++) {
+                    //
+                    //     result.push(responseData.data[i]);
+                    //
+                    // }
+                    //拼接数组
+                    this.data=this.data.concat(responseData.data);
 
 
                     this.setState({
-                        dataSource: result,
+                        dataSource: this.data,
                         refreshState: responseData.data.length < 1 ? RefreshState.NoMoreData : RefreshState.Idle,
                         loaded: true
                     })
@@ -116,11 +139,17 @@ export default class GDHome extends Component<Props> {
                 }
 
 
-            }).catch((error)=>{
+                //存储数组中最后一个元素的id
+                let lastID = responseData.data[responseData.data.length - 1].id
+
+                AsyncStorage.setItem('lastID', lastID.toString());
+                // Alert.alert(lastID.toString())
+
+
+            }).catch((error) => {
 
 
         }).done()
-
 
 
     }
@@ -251,7 +280,7 @@ export default class GDHome extends Component<Props> {
 
         this.setState({
 
-            isModal:true
+            isModal: true
         })
     }
 
@@ -272,11 +301,42 @@ export default class GDHome extends Component<Props> {
 
     }
 
+    showID() {
+
+        //读取存储的id
+        AsyncStorage.getItem('lastID')
+            .then((value) => {
+
+                Alert.alert(value)
+            })
+    }
+
     //返回中间按钮
     renderTitleItem() {
         return (
-            <TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => {
+                    this.showID()
+
+                }}
+            >
                 <Image source={{uri: 'navtitle_home_down_66x20'}} style={styles.navbarTitleItemStyle}/>
+
+            </TouchableOpacity>
+
+        );
+
+
+    }
+
+
+    //返回右边按钮
+    renderRightItem() {
+
+        return (
+
+            <TouchableOpacity onPress={() => this.pushToSearch()}>
+                <Image source={{uri: 'search_icon_20x20'}} style={styles.navbarRightItemStyle}/>
 
             </TouchableOpacity>
 
@@ -296,31 +356,18 @@ export default class GDHome extends Component<Props> {
 
     }
 
-    //返回右边按钮
-    renderRightItem() {
-
-        return (
-
-            <TouchableOpacity onPress={() => this.pushToSearch()}>
-                <Image source={{uri: 'search_icon_20x20'}} style={styles.navbarRightItemStyle}/>
-
-            </TouchableOpacity>
-
-        );
-
-
-    }
-    onRequestClose(){
+    onRequestClose() {
 
         this.setState({
-            isModal:false
+            isModal: false
 
         })
 
     }
-    closeModal(data){
+
+    closeModal(data) {
         this.setState({
-            isModal:false
+            isModal: false
 
         })
 
@@ -335,8 +382,8 @@ export default class GDHome extends Component<Props> {
                 <Modal animationType='slide'
                        transparent={false}
                        visible={this.state.isModal}
-                        onRequestClose={()=>this.onRequestClose()}>
-                    <HalfHourHot removeModal={(data)=>this.closeModal(data)}/>
+                       onRequestClose={() => this.onRequestClose()}>
+                    <HalfHourHot removeModal={(data) => this.closeModal(data)}/>
 
                 </Modal>
                 {/*导航栏样式*/}
