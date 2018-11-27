@@ -326,6 +326,7 @@ export default class GDHome extends Component<Props> {
 
     }
 
+    // 模态跳转
     render() {
         return (
             <View style={styles.container}>
