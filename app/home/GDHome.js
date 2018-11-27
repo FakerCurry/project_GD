@@ -35,6 +35,7 @@ import RefreshListView, {RefreshState} from '../tools/RefreshListView'
 
 //应用外部文件
 import CommunalNavBar from '../main/GDCommunalNavBar';
+import CommunalDetail from '../main/GDCommunalDetail'
 import HalfHourHot from './GDHalfHourHot'
 
 import Search from './GDSearch'
@@ -68,6 +69,7 @@ export default class GDHome extends Component<Props> {
 
         //需要绑定
         this.fetchData = this.fetchData.bind(this)
+        this.renderItem=this.renderItem.bind(this)
     }
 
     //网络请求的方法
@@ -254,15 +256,38 @@ export default class GDHome extends Component<Props> {
 
     }
 
+    pushToDetail(value){
+
+        this.props.navigator.push({
+        
+        
+            component:CommunalDetail,
+            params:{
+                url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
+            }   
+        })
+    }
+    
+
     //返回每一行cell的样式
     renderItem({item}) {
+
+
         return (
-            <CommunalHotCell
-                image={item.image}
-                //测试展位图
-                // image=''
-                title={item.title}
-            />
+
+            <TouchableOpacity
+                onPress={()=>this.pushToDetail(item.id)}
+            >
+                <CommunalHotCell
+                    image={item.image}
+                    //测试展位图
+                    // image=''
+                    title={item.title}
+                />
+
+            </TouchableOpacity>
+
+
 
         );
 
