@@ -12,7 +12,7 @@ import {Platform, StyleSheet, Text, View, Navigator, Image, TouchableOpacity} fr
 import PropTypes from 'prop-types';
 
 //应用外部文件
-import  CommunalNavBar from '../main/GDCommunalNavBar';
+import  CommunalNavBar from './GDCommunalNavBar';
 
 
 type Props = {};

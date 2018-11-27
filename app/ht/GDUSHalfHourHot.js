@@ -30,7 +30,7 @@ const {width, height} = Dimensions.get("window");
 
 
 type Props = {};
-export default class GDHalfHourHot extends Component<Props> {
+export default class GDUSHalfHourHot extends Component<Props> {
 
 
     constructor(props) {
@@ -55,8 +55,11 @@ export default class GDHalfHourHot extends Component<Props> {
 
     //网络请求的方法
     fetchData(resolve) {
+        let params={
+            "c":"us"
+        };
 
-        HTTPBase.get('http://guangdiu.com/api/gethots.php')
+        HTTPBase.get('http://guangdiu.com/api/gethots.php',params)
             .then(responseData => {
 
                 this.setState({

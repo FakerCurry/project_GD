@@ -38,7 +38,7 @@ import CommunalNavBar from '../main/GDCommunalNavBar';
 import CommunalDetail from '../main/GDCommunalDetail'
 import HalfHourHot from './GDHalfHourHot'
 
-import Search from './GDSearch'
+import Search from '../main/GDSearch'
 import NoDataView from "../main/GDNoData";
 
 import CommunalHotCell from "../main/GDCommualHotCell";
@@ -82,13 +82,13 @@ export default class GDHome extends Component<Props> {
                 .then((value) => {
 
 
-                        params={"count": 10, "mall": "京东商城","sinceid":value};
+                        params={"count": 10,"sinceid":value};
 
                 })
 
 
         }else {
-            params={"count": 10, "mall": "京东商城"};
+            params={"count": 10};
 
         }
 
@@ -256,6 +256,7 @@ export default class GDHome extends Component<Props> {
 
     }
 
+    //跳转到详情页
     pushToDetail(value){
 
         this.props.navigator.push({
@@ -408,7 +409,23 @@ export default class GDHome extends Component<Props> {
                        transparent={false}
                        visible={this.state.isModal}
                        onRequestClose={() => this.onRequestClose()}>
-                    <HalfHourHot removeModal={(data) => this.closeModal(data)}/>
+                    <Navigator
+                    initialRoute={{
+                        name:'halfHourHot',
+                        component:HalfHourHot
+
+
+                    }}
+
+                    renderScene={(route,navigator)=>{
+
+                        let Component = route.component;
+                        return   <Component removeModal={(data) => this.closeModal(data)}
+                        {...route.params} navigator={navigator}/>
+                    }}
+                    />
+
+
 
                 </Modal>
                 {/*导航栏样式*/}
