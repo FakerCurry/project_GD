@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View,Image,DeviceEventEmitter} from 'react-native';
+import {Platform, StyleSheet, Text, View, Image, DeviceEventEmitter, AsyncStorage} from 'react-native';
 
 const instructions = Platform.select({
     ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -20,6 +20,8 @@ const instructions = Platform.select({
 import TabNavigator from 'react-native-tab-navigator';
 //https://blog.csdn.net/s8460049/article/details/73331043
 import {Navigator} from 'react-native-deprecated-custom-components';
+
+import HTTPBase from '../http/HTTPBase';
 
 //饮用外部文件
 import Home from '../home/GDHome';
@@ -40,34 +42,38 @@ export default class GDMain extends Component<Props> {
 
             selectedTab: 'home',
             //是否隐藏tabBar
-            isHiddenTabBar:false,
+            isHiddenTabBar: false,
+            cnBadgeText: '',
+            usBadgeText: ''
         };
     }
+
     //设置navigator跳转的动画
 
-    setNavAnimationType(route){
+    setNavAnimationType(route) {
 
-        if (route.animationType){//有值
-            let conf=route.animationType;
-            conf.gestures=null;
+        if (route.animationType) {//有值
+            let conf = route.animationType;
+            conf.gestures = null;
             return conf;
 
 
-        }else{
+        } else {
             return Navigator.SceneConfigs.PushFromRight;
         }
     }
 
 
     //返回tabbar　的item
-    renderTabBarItem(title, selectedTab, image, selImage, component) {
+    renderTabBarItem(title, selectedTab, image, selImage, component, badgeText) {
 
         return (
 
             <TabNavigator.Item
-                selectedTitleStyle={{color:'black'}}
+                selectedTitleStyle={{color: 'black'}}
                 selected={this.state.selectedTab === selectedTab}
                 title={title}
+                badgeText={badgeText==='0'?'':badgeText}
                 renderIcon={() => <Image style={styles.tabIconStyle} source={{uri: image}}/>}
                 renderSelectedIcon={() => <Image style={styles.tabIconStyle} source={{uri: selImage}}/>}
                 // badgeText="1"
@@ -81,8 +87,8 @@ export default class GDMain extends Component<Props> {
 
                     }}
 
-                    configureScene={(route)=>this.setNavAnimationType(route)}
-                   renderScene={(route, navigator) => {
+                    configureScene={(route) => this.setNavAnimationType(route)}
+                    renderScene={(route, navigator) => {
 
                         let Component = route.component;
                         return <Component {...route.params} navigator={navigator}/>
@@ -98,7 +104,7 @@ export default class GDMain extends Component<Props> {
 
     }
 
-    tongZhi(data){
+    tongZhi(data) {
 
         this.setState({
             isHiddenTabBar: data,
@@ -113,7 +119,54 @@ export default class GDMain extends Component<Props> {
 
         });
 
+        let cnfirstID = 0;
+        let usfirstID = 0;
+        console.log('nihao')
 
+        //定时器
+        //最新数据个数
+        setInterval(() => {
+            //取出id
+            AsyncStorage.getItem('cnfirstID')
+                .then((value) => {
+
+                    cnfirstID = parseInt(value);
+
+                })
+
+
+            AsyncStorage.getItem('usfirstID')
+                .then((value) => {
+
+                    usfirstID = parseInt(value);
+                })
+
+            if (cnfirstID !== 0 && usfirstID !== 0) {
+
+                //参数拼接
+                let params = {
+
+                    "cnmaxid": cnfirstID,
+                    "usmaxid": usfirstID
+                }
+                //请求网络数据
+                HTTPBase.get('http://guangdiu.com/api/getnewitemcount.php', params)
+                    .then((responseData) => {
+                        console.log(responseData)
+                        this.setState({
+
+                            cnBadgeText: responseData.cn,
+                            usBadgeText: responseData.us
+
+
+                        })
+
+                    })
+
+            }
+
+
+        }, 30000)
 
 
     }
@@ -123,22 +176,22 @@ export default class GDMain extends Component<Props> {
         this.subscription.remove()
     }
 
-        render() {
+    render() {
         return (
 
 
-                <TabNavigator
-                    tabBarStyle={this.state.isHiddenTabBar!==true?{}:{height: 0,overflow:'hidden'}}
-                        sceneStyle={this.state.isHiddenTabBar!==true?{}:{paddingBottom: 0}}
+            <TabNavigator
+                tabBarStyle={this.state.isHiddenTabBar !== true ? {} : {height: 0, overflow: 'hidden'}}
+                sceneStyle={this.state.isHiddenTabBar !== true ? {} : {paddingBottom: 0}}
 
-                >
-                    {/*首页*/}
-                    {this.renderTabBarItem("首页", "home", "tabbar_home_30x30", "tabbar_home_selected_30x30", Home)}
-                    {/*海淘*/}
-                    {this.renderTabBarItem("海淘", "ht", "tabbar_abroad_30x30", "tabbar_abroad_selected_30x30", Ht)}
-                    {/*小时风云帮*/}
-                    {this.renderTabBarItem("小时风云榜", "hourList", "tabbar_rank_30x30", "tabbar_rank_selected_30x30", HourList)}
-                </TabNavigator>
+            >
+                {/*首页*/}
+                {this.renderTabBarItem("首页", "home", "tabbar_home_30x30", "tabbar_home_selected_30x30", Home,this.state.cnBadgeText)}
+                {/*海淘*/}
+                {this.renderTabBarItem("海淘", "ht", "tabbar_abroad_30x30", "tabbar_abroad_selected_30x30", Ht,this.state.usBadgeText)}
+                {/*小时风云帮*/}
+                {this.renderTabBarItem("小时风云榜", "hourList", "tabbar_rank_30x30", "tabbar_rank_selected_30x30", HourList)}
+            </TabNavigator>
 
         );
     }
@@ -151,7 +204,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#F5FCFF',
     },
-    tabIconStyle:{
+    tabIconStyle: {
 
         width: Platform.OS == 'ios' ? 30 : 25,
         height: Platform.OS == 'ios' ? 30 : 25

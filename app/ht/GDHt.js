@@ -78,7 +78,7 @@ export default class GDHt extends Component<Props> {
         let params ;
         if (type === 2) {
             //读取存储的id
-            AsyncStorage.getItem('lastID')
+            AsyncStorage.getItem('uslastID')
                 .then((value) => {
 
 
@@ -109,6 +109,11 @@ export default class GDHt extends Component<Props> {
 
                     })
 
+                    //保存第0个
+                    let usfirstID = responseData.data[0].id;
+
+                    AsyncStorage.setItem('usfirstID', usfirstID.toString());
+
                 } else if (type === 1) {
 
                     this.data=responseData.data;
@@ -119,6 +124,11 @@ export default class GDHt extends Component<Props> {
                         isRefreshing: false,
                         loaded: true
                     })
+
+                    //保存第0个
+                    let usfirstID = responseData.data[0].id;
+
+                    AsyncStorage.setItem('usfirstID', usfirstID.toString());
 
                 } else {
 
@@ -142,9 +152,9 @@ export default class GDHt extends Component<Props> {
 
 
                 //存储数组中最后一个元素的id
-                let lastID = responseData.data[responseData.data.length - 1].id
+                let uslastID = responseData.data[responseData.data.length - 1].id
 
-                AsyncStorage.setItem('lastID', lastID.toString());
+                AsyncStorage.setItem('uslastID', uslastID.toString());
                 // Alert.alert(lastID.toString())
 
 

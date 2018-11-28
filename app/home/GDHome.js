@@ -78,7 +78,7 @@ export default class GDHome extends Component<Props> {
         let params ;
         if (type === 2) {
             //读取存储的id
-            AsyncStorage.getItem('lastID')
+            AsyncStorage.getItem('cnlastID')
                 .then((value) => {
 
 
@@ -99,6 +99,9 @@ export default class GDHome extends Component<Props> {
             .then(responseData => {
 
 
+
+
+
                 if (type === 0) {
                     this.data=responseData.data;
 
@@ -108,6 +111,11 @@ export default class GDHome extends Component<Props> {
                         loaded: true
 
                     })
+
+                    //保存第0个
+                    let cnfirstID = responseData.data[0].id;
+
+                    AsyncStorage.setItem('cnfirstID', cnfirstID.toString());
 
                 } else if (type === 1) {
 
@@ -119,6 +127,11 @@ export default class GDHome extends Component<Props> {
                         isRefreshing: false,
                         loaded: true
                     })
+
+                    //保存第0个
+                    let cnfirstID = responseData.data[0].id;
+
+                    AsyncStorage.setItem('cnfirstID', cnfirstID.toString());
 
                 } else {
 
@@ -142,10 +155,10 @@ export default class GDHome extends Component<Props> {
 
 
                 //存储数组中最后一个元素的id
-                let lastID = responseData.data[responseData.data.length - 1].id
+                let cnlastID = responseData.data[responseData.data.length - 1].id;
 
-                AsyncStorage.setItem('lastID', lastID.toString());
-                // Alert.alert(lastID.toString())
+                AsyncStorage.setItem('cnlastID', cnlastID.toString());
+
 
 
             }).catch((error) => {
@@ -158,6 +171,8 @@ export default class GDHome extends Component<Props> {
 
 
     componentDidMount() {
+
+        console.log('xixi')
         var type = 0;
         this.fetchData(type);
 
@@ -330,7 +345,7 @@ export default class GDHome extends Component<Props> {
     showID() {
 
         //读取存储的id
-        AsyncStorage.getItem('lastID')
+        AsyncStorage.getItem('cnlastID')
             .then((value) => {
 
                 Alert.alert(value)
