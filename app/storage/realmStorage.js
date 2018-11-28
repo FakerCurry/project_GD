@@ -1,33 +1,53 @@
-var RealmBase={};
+var RealmBase = {};
 
 import Realm from 'realm';
 // const Realm = require('realm');
 
-const HomeSchame={
+const HomeSchame = {
 
-    name:'HomeData',
-    properties:{
+    name: 'HomeData',
+    properties: {
 
-        id:'int',
-        title:'string',
-        image:'string',
-        mall:'string'
+        id: 'int',
+        title: 'string',
+        image: 'string',
+        mall: 'string',
+        pubtime: 'string',
+        fromsite: 'string'
 
     }
 
 }
 
 
+const HTSchame = {
 
-const HTSchame={
+    name: 'HTData',
+    properties: {
 
-    name:'HTData',
-    properties:{
+        id: 'int',
+        title: 'string',
+        image: 'string',
+        mall: 'string',
+        pubtime: 'string',
+        fromsite: 'string'
 
-        id:'int',
-        title:'string',
-        image:'string',
-        mall:'string'
+    }
+
+}
+
+
+const HourlistSchame = {
+
+    name: 'HourlistSchame',
+    properties: {
+
+        id: 'int',
+        title: 'string',
+        image: 'string',
+        mall: 'string',
+        pubtime: 'string',
+        fromsite: 'string'
 
     }
 
@@ -37,59 +57,61 @@ const HTSchame={
 
 
 //初始化realm
-let realm=new Realm({schema:[HomeSchame,HTSchame]});
+let realm = new Realm({schema: [HomeSchame, HTSchame,HourlistSchame]});
 
 //增加
-RealmBase.create=function (schame,data) {
+RealmBase.create = function (schame, data) {
 
-    realm.write(()=>{
+    realm.write(() => {
 
-      for (let i=0;i<data.length;i++){
+        for (let i = 0; i < data.length; i++) {
 
-          let temp=data[i];
-          realm.create(schame,{id:temp.id,title:temp.title,image:temp.image,
-          mall:temp.mall})
+            let temp = data[i];
+            realm.create(schame, {
+                id: temp.id, title: temp.title, image: temp.image,
+                mall: temp.mall,pubtime:temp.pubtime,fromsite:temp.fromsite
+            })
 
-      }
+        }
 
     })
-    
+
 }
 
 
 //查询
-RealmBase.loadAll=function (schame) {
+RealmBase.loadAll = function (schame) {
 
     return realm.objects(schame)
 
 }
 
 //条件查询
-RealmBase.filtered=function (schame,filtered) {
+RealmBase.filtered = function (schame, filtered) {
 
     //获取对象
-    let objects=realm.objects(schame);
+    let objects = realm.objects(schame);
     //筛选
-    let object=objects.filtered(filtered);
-    if (object){
+    let object = objects.filtered(filtered);
+    if (object) {
 
         return object;
-    }else {
+    } else {
         return '未找到数据';
     }
 
 }
 
 //删除
-RealmBase.removeAllData=function (schame) {
-    realm.write(()=>{
+RealmBase.removeAllData = function (schame) {
+    realm.write(() => {
 
         //获取对象
-        let objects=realm.objects(schame);
+        let objects = realm.objects(schame);
         //删除表
         realm.delete(objects)
 
     })
 }
 
-global.RealmBase=RealmBase;
+global.RealmBase = RealmBase;

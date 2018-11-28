@@ -41,7 +41,8 @@ import USHalfHourHot from './GDUSHalfHourHot'
 import Search from '../main/GDSearch'
 import NoDataView from "../main/GDNoData";
 
-import CommunalHotCell from "../main/GDCommualHotCell";
+
+import CommunalCell from "../main/GDCommunalCell";
 
 
 const {width, height} = Dimensions.get("window");
@@ -113,6 +114,11 @@ export default class GDHt extends Component<Props> {
 
                     AsyncStorage.setItem('usfirstID', usfirstID.toString());
 
+                    //先清空所有数据
+                    RealmBase.removeAllData('HTData');
+                    //存储数据到本地
+                    RealmBase.create('HTData',responseData.data);
+
                 } else if (type === 1) {
 
                     this.data=responseData.data;
@@ -128,6 +134,11 @@ export default class GDHt extends Component<Props> {
                     let usfirstID = responseData.data[0].id;
 
                     AsyncStorage.setItem('usfirstID', usfirstID.toString());
+
+                    //先清空所有数据
+                    RealmBase.removeAllData('HTData')
+                    //存储数据到本地
+                    RealmBase.create('HTData',responseData.data);
 
                 } else {
 
@@ -159,6 +170,18 @@ export default class GDHt extends Component<Props> {
 
             }).catch((error) => {
 
+                if (type!==2){
+                    //拿到本地存储的数据，展示出来，如果没有存储，那就显示无数据页面
+
+                    this.data = RealmBase.loadAll('HTData');
+                    this.setState({
+
+                        dataSource: this.data,
+                        loaded: true
+
+                    })
+
+                }
 
         }).done()
 
@@ -288,13 +311,16 @@ export default class GDHt extends Component<Props> {
             <TouchableOpacity
                 onPress={()=>this.pushToDetail(item.id)}
             >
-                <CommunalHotCell
+                <CommunalCell
                     image={item.image}
                     //测试展位图
                     // image=''
                     title={item.title}
-                />
+                    mall={item.mall}
+                    pubTime={item.pubtime}
+                    fromSite={item.fromsite}
 
+                />
             </TouchableOpacity>
 
 

@@ -41,7 +41,7 @@ import HalfHourHot from './GDHalfHourHot'
 import Search from '../main/GDSearch'
 import NoDataView from "../main/GDNoData";
 
-import CommunalHotCell from "../main/GDCommualHotCell";
+import CommunalCell from "../main/GDCommunalCell";
 
 
 
@@ -117,6 +117,12 @@ export default class GDHome extends Component<Props> {
 
                     AsyncStorage.setItem('cnfirstID', cnfirstID.toString());
 
+
+                    //先清空所有数据
+                    RealmBase.removeAllData('HomeData')
+                    //存储数据到本地
+                    RealmBase.create('HomeData',responseData.data);
+
                 } else if (type === 1) {
 
                     this.data=responseData.data;
@@ -132,6 +138,11 @@ export default class GDHome extends Component<Props> {
                     let cnfirstID = responseData.data[0].id;
 
                     AsyncStorage.setItem('cnfirstID', cnfirstID.toString());
+
+                    //先清空所有数据
+                    RealmBase.removeAllData('HomeData')
+                    //存储数据到本地
+                    RealmBase.create('HomeData',responseData.data);
 
                 } else {
 
@@ -159,25 +170,26 @@ export default class GDHome extends Component<Props> {
 
                 AsyncStorage.setItem('cnlastID', cnlastID.toString());
 
-                //先清空所有数据
-                RealmBase.removeAllData('HomeData')
-                //存储数据到本地
-                RealmBase.create('HomeData',responseData.data);
+
 
 
 
 
 
             }).catch((error) => {
-              //拿到本地存储的数据，展示出来，如果没有存储，那就显示无数据页面
+                if (type!==2){
 
-           this.data = RealmBase.loadAll('HomeData');
-            this.setState({
+                    //拿到本地存储的数据，展示出来，如果没有存储，那就显示无数据页面
 
-                dataSource: this.data,
-                loaded: true
+                    this.data = RealmBase.loadAll('HomeData');
+                    this.setState({
 
-            })
+                        dataSource: this.data,
+                        loaded: true
+
+                    })
+                }
+
 
         }).done()
 
@@ -187,7 +199,7 @@ export default class GDHome extends Component<Props> {
 
     componentDidMount() {
 
-        console.log('xixi')
+
         var type = 0;
         this.fetchData(type);
 
@@ -309,11 +321,15 @@ export default class GDHome extends Component<Props> {
             <TouchableOpacity
                 onPress={()=>this.pushToDetail(item.id)}
             >
-                <CommunalHotCell
+                <CommunalCell
                     image={item.image}
                     //测试展位图
                     // image=''
                     title={item.title}
+                    mall={item.mall}
+                    pubTime={item.pubtime}
+                    fromSite={item.fromsite}
+
                 />
 
             </TouchableOpacity>
