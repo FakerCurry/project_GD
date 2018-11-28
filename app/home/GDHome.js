@@ -42,7 +42,7 @@ import Search from '../main/GDSearch'
 import NoDataView from "../main/GDNoData";
 
 import CommunalHotCell from "../main/GDCommualHotCell";
-import HTTPBase from '../http/HTTPBase'
+
 
 
 const {width, height} = Dimensions.get("window");
@@ -159,10 +159,25 @@ export default class GDHome extends Component<Props> {
 
                 AsyncStorage.setItem('cnlastID', cnlastID.toString());
 
+                //先清空所有数据
+                RealmBase.removeAllData('HomeData')
+                //存储数据到本地
+                RealmBase.create('HomeData',responseData.data);
+
+
+
 
 
             }).catch((error) => {
+              //拿到本地存储的数据，展示出来，如果没有存储，那就显示无数据页面
 
+           this.data = RealmBase.loadAll('HomeData');
+            this.setState({
+
+                dataSource: this.data,
+                loaded: true
+
+            })
 
         }).done()
 

@@ -126,9 +126,6 @@ HTTPBase.post=function(url,params,headers){
 
 }
 
-
-
-
-module.exports=HTTPBase;
+global.HTTPBase=HTTPBase;
 
 

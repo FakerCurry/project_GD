@@ -21,12 +21,14 @@ import TabNavigator from 'react-native-tab-navigator';
 //https://blog.csdn.net/s8460049/article/details/73331043
 import {Navigator} from 'react-native-deprecated-custom-components';
 
-import HTTPBase from '../http/HTTPBase';
+
 
 //饮用外部文件
 import Home from '../home/GDHome';
 import Ht from '../ht/GDHt';
 import HourList from '../hourList/GDHourList';
+
+
 
 
 type Props = {};
@@ -153,6 +155,7 @@ export default class GDMain extends Component<Props> {
                 HTTPBase.get('http://guangdiu.com/api/getnewitemcount.php', params)
                     .then((responseData) => {
                         console.log(responseData)
+
                         this.setState({
 
                             cnBadgeText: responseData.cn,
@@ -161,7 +164,11 @@ export default class GDMain extends Component<Props> {
 
                         })
 
-                    })
+                    }).catch((error)=>{
+
+                })
+
+
 
             }
 

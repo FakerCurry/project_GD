@@ -22,6 +22,11 @@ import Main from './app/main/GDMain';
 import LaunchPage from './app/main/GDLaunchPage'
 
 
+import HTTPBase from './app/http/HTTPBase';
+
+import RealmStorage from './app/storage/realmStorage';
+
+
 type Props = {};
 export default class App extends Component<Props> {
     render() {

@@ -42,7 +42,6 @@ import Search from '../main/GDSearch'
 import NoDataView from "../main/GDNoData";
 
 import CommunalHotCell from "../main/GDCommualHotCell";
-import HTTPBase from '../http/HTTPBase'
 
 
 const {width, height} = Dimensions.get("window");

@@ -18,7 +18,7 @@ import CommunalNavBar from '../main/GDCommunalNavBar';
 import CommunalHotCell from '../main/GDCommualHotCell';
 import NoDataView from '../main/GDNoData'
 
-import HTTPBase from '../http/HTTPBase';
+
 
 //第三方
 import {PullView} from 'react-native-pull';
