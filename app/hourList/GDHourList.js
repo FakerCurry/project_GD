@@ -43,9 +43,7 @@ import NoDataView from "../main/GDNoData";
 import CommunalCell from "../main/GDCommunalCell";
 
 
-
 const {width, height} = Dimensions.get("window");
-
 
 
 type Props = {};
@@ -60,32 +58,62 @@ export default class GDHourList extends Component<Props> {
             loaded: false,
             refreshState: RefreshState.Idle,
             isRefreshing: false,
-            isModal: false
+            isModal: false,
+            prompt:''
+
 
         };
 
-        this.data=[]
+        this.data = [];
+        this.nowHour = 0;
+
+        this.nexthourhour="";
+        this.nexthourdate="";
+        this.lasthourhour="";
+        this.lasthourdate="";
 
         //需要绑定
         this.fetchData = this.fetchData.bind(this)
-        this.renderItem=this.renderItem.bind(this)
+        this.renderItem = this.renderItem.bind(this)
     }
 
 
     //网络请求的方法
     //type 0:普通请求    1：下拉刷新   2：上拉加载
-    fetchData(type) {
+    fetchData(type,date,hour) {
 
 
+        let params={};
+        
+        if (date) {
+
+            params={
+                "date":date,
+                "hour":hour
+
+            }
+        }
+        
 
 
-
-        HTTPBase.post('http://guangdiu.com/api/getranklist.php')
+        HTTPBase.get('http://guangdiu.com/api/getranklist.php',params)
             .then(responseData => {
+
+                //暂时保存数据
+                this.nexthourhour=responseData.nexthourhour;
+                this.nexthourdate=responseData.nexthourdate;
+                this.lasthourhour=responseData.lasthourhour;
+                this.lasthourdate=responseData.lasthourdate;
+                this.setState({
+
+
+                    prompt:responseData.displaydate+responseData.rankhour+'点档'+'('+responseData.rankduring+')'
+
+                })
 
 
                 if (type === 0) {
-                    this.data=responseData.data;
+                    this.data = responseData.data;
 
                     this.setState({
 
@@ -98,14 +126,9 @@ export default class GDHourList extends Component<Props> {
 
 
 
-                    //先清空所有数据
-                    RealmBase.removeAllData('HourlistSchame');
-                    //存储数据到本地
-                    RealmBase.create('HourlistSchame',responseData.data);
-
                 } else if (type === 1) {
 
-                    this.data=responseData.data;
+                    this.data = responseData.data;
 
 
                     this.setState({
@@ -116,34 +139,12 @@ export default class GDHourList extends Component<Props> {
 
 
 
-                    //先清空所有数据
-                    RealmBase.removeAllData('HourlistSchame')
-                    //存储数据到本地
-                    RealmBase.create('HourlistSchame',responseData.data);
 
                 }
 
 
-
-
-
-
-
-
-
-
-
             }).catch((error) => {
 
-                //拿到本地存储的数据，展示出来，如果没有存储，那就显示无数据页面
-
-                this.data = RealmBase.loadAll('HourlistSchame');
-                this.setState({
-
-                    dataSource: this.data,
-                    loaded: true
-
-                })
 
 
 
@@ -154,8 +155,9 @@ export default class GDHourList extends Component<Props> {
 
 
 
+
     componentDidMount() {
-        let type=0;
+        let type = 0;
 
         this.fetchData(type);
 
@@ -174,7 +176,7 @@ export default class GDHourList extends Component<Props> {
 
         // 模拟网络请求
         setTimeout(() => {
-            let type=1;
+            let type = 1;
             this.fetchData(type);
 
             // this.setState({
@@ -183,9 +185,6 @@ export default class GDHourList extends Component<Props> {
             // })
         }, 2000)
     }
-
-
-
 
 
     //判断是否有数据
@@ -244,14 +243,14 @@ export default class GDHourList extends Component<Props> {
 
 
     //跳转到详情页
-    pushToDetail(value){
+    pushToDetail(value) {
 
         this.props.navigator.push({
 
 
-            component:CommunalDetail,
-            params:{
-                url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
+            component: CommunalDetail,
+            params: {
+                url: 'https://guangdiu.com/api/showdetail.php' + '?' + 'id=' + value
             }
         })
     }
@@ -260,8 +259,8 @@ export default class GDHourList extends Component<Props> {
     //跳转到设置
     pushToSetting() {
 
-    }
 
+    }
 
 
     //返回每一行cell的样式
@@ -271,7 +270,7 @@ export default class GDHourList extends Component<Props> {
         return (
 
             <TouchableOpacity
-                onPress={()=>this.pushToDetail(item.id)}
+                onPress={() => this.pushToDetail(item.id)}
             >
                 <CommunalCell
                     image={item.image}
@@ -287,7 +286,6 @@ export default class GDHourList extends Component<Props> {
             </TouchableOpacity>
 
 
-
         );
 
 
@@ -295,23 +293,22 @@ export default class GDHourList extends Component<Props> {
 
 
     //返回中间按钮
-    renderTitleItem(){
-        return(
+    renderTitleItem() {
+        return (
             <TouchableOpacity>
-                <Image source={{uri:'navtitle_rank_106x20'}} style={styles.navbarTitleItemStyle}/>
+                <Image source={{uri: 'navtitle_rank_106x20'}} style={styles.navbarTitleItemStyle}/>
 
             </TouchableOpacity>
 
         );
 
 
-
     }
 
     //返回右边按钮
-    renderRightItem(){
+    renderRightItem() {
 
-        return(
+        return (
 
             <TouchableOpacity
                 onPress={this.pushToSetting()}
@@ -325,7 +322,50 @@ export default class GDHourList extends Component<Props> {
 
     }
 
+    // nowDate() {
+    //
+    //     //获取当前时间
+    //     let date = new Date();
+    //     let year = date.getFullYear();//年
+    //     let month = date.getMonth();//月
+    //     let day = date.getDate();//日
+    //
+    //     if (month >= 0 && month <= 8) {//在10以内，我们手动添加0
+    //         month = "0" + (month + 1);
+    //
+    //
+    //     } else {
+    //         month = (month+1).toString();
+    //     }
+    //
+    //     if (day >= 1 && day <= 9) {//在10以内，我们手动添加0
+    //         day = "0" + day;
+    //
+    //     } else {
+    //
+    //         day = day.toString();
+    //     }
+    //
+    //     return year + month + day;
+    //
+    //
+    // }
 
+    //上一小时
+    lastHour() {
+
+
+        let type=0;
+        this.fetchData(type,this.lasthourdate,this.lasthourhour);
+
+    }
+
+    // 下一小时
+    nextHour() {
+        let type=0;
+        this.fetchData(type,this.nexthourdate,this.nexthourhour);
+
+    }
 
 
     render() {
@@ -342,7 +382,7 @@ export default class GDHourList extends Component<Props> {
                 {/*提醒栏*/}
                 <View style={styles.promptViewStyle}>
 
-                  <Text>提示栏提示栏提示栏提示栏</Text>
+                    <Text>{this.state.prompt}</Text>
 
                 </View>
 
@@ -350,17 +390,17 @@ export default class GDHourList extends Component<Props> {
                 {this.renderFlatView()}
 
                 {/*操作栏*/}
-               <View style={styles.operationViewStyle}>
-                   <TouchableOpacity>
-                       <Text style={{marginRight: 10,fontSize: 17, color:'green'}}>{"<"+"上一小时"}</Text>
+                <View style={styles.operationViewStyle}>
+                    <TouchableOpacity onPress={() => this.lastHour()}>
+                        <Text style={{marginRight: 10, fontSize: 17, color: 'green'}}>{"<" + "上一小时"}</Text>
 
-                   </TouchableOpacity>
-                   <TouchableOpacity>
-                       <Text style={{marginLeft: 10,fontSize:17,color:'green'}}>{"下一小时"+">"}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => this.nextHour()}>
+                        <Text style={{marginLeft: 10, fontSize: 17, color: 'green'}}>{"下一小时" + ">"}</Text>
 
-                   </TouchableOpacity>
+                    </TouchableOpacity>
 
-               </View>
+                </View>
 
 
             </View>
@@ -375,34 +415,34 @@ const styles = StyleSheet.create({
         alignItems: 'center',
 
     },
-    navbarTitleItemStyle:{
-        width:106,
+    navbarTitleItemStyle: {
+        width: 106,
         height: 20,
         marginLeft: 50
     }
 
     ,
-    navbarRightItemStyle:{
-      fontSize:17,
-        color:'rgba(123,178,114,1.0)',
+    navbarRightItemStyle: {
+        fontSize: 17,
+        color: 'rgba(123,178,114,1.0)',
         marginRight: 15,
     },
-    promptViewStyle:{
+    promptViewStyle: {
 
-        width:width,
-        height:44,
+        width: width,
+        height: 44,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(250,250,250,1.0)',
 
     },
-    operationViewStyle:{
+    operationViewStyle: {
 
-        width:width,
-        height:44,
-        flexDirection:'row',
+        width: width,
+        height: 44,
+        flexDirection: 'row',
         justifyContent: 'center',
-        alignItems:'center',
+        alignItems: 'center',
 
     }
 });
