@@ -352,7 +352,7 @@ export default class GDHome extends Component<Props> {
             <TouchableOpacity
 
             >
-                <Text>搜索全网折扣</Text>
+                <Text style={{marginRight:15}}>搜索全网折扣</Text>
 
             </TouchableOpacity>
 

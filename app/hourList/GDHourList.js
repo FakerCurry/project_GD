@@ -42,6 +42,8 @@ import NoDataView from "../main/GDNoData";
 
 import CommunalCell from "../main/GDCommunalCell";
 
+import Settings from './GDSettings';
+
 
 const {width, height} = Dimensions.get("window");
 
@@ -260,6 +262,12 @@ export default class GDHourList extends Component<Props> {
     pushToSetting() {
 
 
+        this.props.navigator.push({
+
+            component:Settings,
+
+
+        })
     }
 
 
@@ -311,7 +319,10 @@ export default class GDHourList extends Component<Props> {
         return (
 
             <TouchableOpacity
-                onPress={this.pushToSetting()}
+                onPress={()=>{
+                    this.pushToSetting()
+
+                }}
             >
                 <Text style={styles.navbarRightItemStyle}>设置</Text>
 
