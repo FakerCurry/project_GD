@@ -21,7 +21,7 @@ import {
     Modal,
     AsyncStorage,
     TextInput,
-    Text
+    Text, DeviceEventEmitter
 } from 'react-native';
 
 //第三方
@@ -167,7 +167,17 @@ export default class GDHome extends Component<Props> {
     }
 
 
+    componentWillMount() {
+        DeviceEventEmitter.emit('isHiddenTabBar', true);
+    }
 
+
+
+    componentWillUnmount() {
+
+        DeviceEventEmitter.emit('isHiddenTabBar', false);
+
+    }
 
 
     onHeaderRefresh = () => {
@@ -306,6 +316,7 @@ export default class GDHome extends Component<Props> {
 
 
     pop() {
+        //使得键盘消失
         dismissKeyboard();
 
         this.props.navigator.pop();
@@ -394,8 +405,7 @@ export default class GDHome extends Component<Props> {
                         <TouchableOpacity
                             onPress={()=>{
 
-                                // 使得键盘消失
-                                dismissKeyboard()
+                                this.pop()
                             }}
                         >
                             <Text style={{color:'green'}}>取消</Text>
