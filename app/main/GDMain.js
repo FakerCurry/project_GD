@@ -22,20 +22,17 @@ import TabNavigator from 'react-native-tab-navigator';
 import {Navigator} from 'react-native-deprecated-custom-components';
 
 
-
 //饮用外部文件
 import Home from '../home/GDHome';
 import Ht from '../ht/GDHt';
 import HourList from '../hourList/GDHourList';
 
 
-
-
 type Props = {};
 export default class GDMain extends Component<Props> {
 
 
-    //es6
+    //es6 构造
     constructor(props) {
 
         super(props);
@@ -51,7 +48,6 @@ export default class GDMain extends Component<Props> {
     }
 
     //设置navigator跳转的动画
-
     setNavAnimationType(route) {
 
         if (route.animationType) {//有值
@@ -66,8 +62,23 @@ export default class GDMain extends Component<Props> {
     }
 
 
+//点击了item
+    clickItem(selectedTab,subscription){
+        
+        if (subscription!==""&&this.state.selectedTab==selectedTab) {
+
+            DeviceEventEmitter.emit(subscription);
+        }
+        
+
+        //渲染页面
+        this.setState({selectedTab: selectedTab})
+
+
+    }
+
     //返回tabbar　的item
-    renderTabBarItem(title, selectedTab, image, selImage, component, badgeText) {
+    renderTabBarItem(title, selectedTab, image, selImage, component, badgeText,subscription) {
 
         return (
 
@@ -75,11 +86,11 @@ export default class GDMain extends Component<Props> {
                 selectedTitleStyle={{color: 'black'}}
                 selected={this.state.selectedTab === selectedTab}
                 title={title}
-                badgeText={badgeText==='0'?'':badgeText}
+                badgeText={badgeText === '0' ? '' : badgeText}
                 renderIcon={() => <Image style={styles.tabIconStyle} source={{uri: image}}/>}
                 renderSelectedIcon={() => <Image style={styles.tabIconStyle} source={{uri: selImage}}/>}
                 // badgeText="1"
-                onPress={() => this.setState({selectedTab: selectedTab})}>
+                onPress={() => this.clickItem(selectedTab,subscription)}>
 
                 <Navigator
                     initialRoute={{
@@ -93,7 +104,7 @@ export default class GDMain extends Component<Props> {
                     renderScene={(route, navigator) => {
 
                         let Component = route.component;
-                        return <Component {...route.params} navigator={navigator}/>
+                        return <Component {...route.params} navigator={navigator} loadDatanumber={()=>this.loadDataNumber()}/>
 
                     }}
 
@@ -106,6 +117,7 @@ export default class GDMain extends Component<Props> {
 
     }
 
+    //是否隐藏底部导航栏
     tongZhi(data) {
 
         this.setState({
@@ -114,6 +126,43 @@ export default class GDMain extends Component<Props> {
     }
 
 
+    //获取最新数据的个数的网络请求
+    loadDataNumber() {
+
+        //取出id
+        AsyncStorage.multiGet(['cnfirstID', 'usfirstID'], (error, stores) => {
+//参数拼接
+            let params = {
+
+                "cnmaxid": stores[0][1],
+                "usmaxid": stores[1][1]
+            }
+            //请求网络数据
+            HTTPBase.get('http://guangdiu.com/api/getnewitemcount.php', params)
+                .then((responseData) => {
+
+
+                    this.setState({
+
+                        cnBadgeText: responseData.cn,
+                        usBadgeText: responseData.us
+
+
+                    })
+
+                }).catch((error) => {
+
+            })
+
+        });
+
+
+
+
+
+    }
+
+// 组建加载完成
     componentDidMount() {
         this.subscription = DeviceEventEmitter.addListener('isHiddenTabBar', (data) => {
 
@@ -121,64 +170,24 @@ export default class GDMain extends Component<Props> {
 
         });
 
-        let cnfirstID = 0;
-        let usfirstID = 0;
-        console.log('nihao')
+        // let cnfirstID = 0;
+        // let usfirstID = 0;
+
 
         //定时器
         //最新数据个数
         setInterval(() => {
-            //取出id
-            AsyncStorage.getItem('cnfirstID')
-                .then((value) => {
-
-                    cnfirstID = parseInt(value);
-
-                })
 
 
-            AsyncStorage.getItem('usfirstID')
-                .then((value) => {
-
-                    usfirstID = parseInt(value);
-                })
-
-            if (cnfirstID !== 0 && usfirstID !== 0) {
-
-                //参数拼接
-                let params = {
-
-                    "cnmaxid": cnfirstID,
-                    "usmaxid": usfirstID
-                }
-                //请求网络数据
-                HTTPBase.get('http://guangdiu.com/api/getnewitemcount.php', params)
-                    .then((responseData) => {
-                        console.log(responseData)
-
-                        this.setState({
-
-                            cnBadgeText: responseData.cn,
-                            usBadgeText: responseData.us
+            this.loadDataNumber();
 
 
-                        })
-
-                    }).catch((error)=>{
-
-                })
-
-
-
-            }
-
-
-        }, 30000)
+        }, 3000)
 
 
     }
 
-
+// 组建即将销毁
     componentWillUnmount() {
         this.subscription.remove()
     }
@@ -193,9 +202,9 @@ export default class GDMain extends Component<Props> {
 
             >
                 {/*首页*/}
-                {this.renderTabBarItem("首页", "home", "tabbar_home_30x30", "tabbar_home_selected_30x30", Home,this.state.cnBadgeText)}
+                {this.renderTabBarItem("首页", "home", "tabbar_home_30x30", "tabbar_home_selected_30x30", Home, this.state.cnBadgeText,"clickHomeItem")}
                 {/*海淘*/}
-                {this.renderTabBarItem("海淘", "ht", "tabbar_abroad_30x30", "tabbar_abroad_selected_30x30", Ht,this.state.usBadgeText)}
+                {this.renderTabBarItem("海淘", "ht", "tabbar_abroad_30x30", "tabbar_abroad_selected_30x30", Ht, this.state.usBadgeText,"clickHTItem")}
                 {/*小时风云帮*/}
                 {this.renderTabBarItem("小时风云榜", "hourList", "tabbar_rank_30x30", "tabbar_rank_selected_30x30", HourList)}
             </TabNavigator>

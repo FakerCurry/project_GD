@@ -381,7 +381,7 @@ export default class GDHourList extends Component<Props> {
     }
 
     // 下一小时
-    nextHour() {                                                                            
+    nextHour() {
         let type=0;
         this.fetchData(type,this.nexthourdate,this.nexthourhour);
 

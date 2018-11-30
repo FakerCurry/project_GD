@@ -19,7 +19,7 @@ import {
     Alert,
     RefreshControl,
     Modal,
-    AsyncStorage
+    AsyncStorage, DeviceEventEmitter
 } from 'react-native';
 
 //第三方
@@ -46,14 +46,21 @@ import CommunalCell from "../main/GDCommunalCell";
 import CommunalSiftMenu from "../main/GDCommunalSiftMenu";
 import HTSiftData from "../data/HTSiftData";
 import HalfHourHot from "../home/GDHalfHourHot";
-
+import PropTypes from 'prop-types';
 
 const {width, height} = Dimensions.get("window");
 
 type Props = {};
 export default class GDHt extends Component<Props> {
 
+    static  defaultProps={
 
+        loadDatanumber:{
+
+        }
+
+
+    }
     constructor(props) {
         super(props);
 
@@ -70,10 +77,20 @@ export default class GDHt extends Component<Props> {
         };
 
         this.data=[]
+        this.list=null;
 
         //需要绑定
         this.fetchData = this.fetchData.bind(this)
         this.renderItem=this.renderItem.bind(this)
+    }
+
+
+
+    //获取最新数据个数
+    loadDatanumber(){
+
+        this.props.loadDatanumber();
+
     }
 
     //网络请求的方法
@@ -164,6 +181,13 @@ export default class GDHt extends Component<Props> {
 
                 }
 
+
+                //上啦加载不需要更新角标
+                if (type!==2){
+                    //获取最新数据的个数
+                    this.loadDatanumber();
+
+                }
 
                 //存储数组中最后一个元素的id
                 let uslastID = responseData.data[responseData.data.length - 1].id
@@ -268,10 +292,22 @@ export default class GDHt extends Component<Props> {
     }
 
 
+    clickTabBarItem(){
+
+
+        //一见置顶
+        this.list.scrollToIndex({ viewPosition: 0, index: 0 });
+
+    }
 
     componentDidMount() {
         var type = 0;
         this.fetchData(type);
+
+        this.subscription=DeviceEventEmitter.addListener('clickHTItem',()=>{
+
+            this.clickTabBarItem()
+        } )
 
     }
 
@@ -330,6 +366,7 @@ export default class GDHt extends Component<Props> {
 
 
                 <RefreshListView
+                    listRef={(ref)=>this.list=ref}
                     data={this.state.dataSource}
                     keyExtractor={this.keyExtractor}
                     renderItem={this.renderItem}
