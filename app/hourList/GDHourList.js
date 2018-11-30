@@ -61,7 +61,8 @@ export default class GDHourList extends Component<Props> {
             refreshState: RefreshState.Idle,
             isRefreshing: false,
             isModal: false,
-            prompt:''
+            prompt:'',
+            isNextTouch:false
 
 
         };
@@ -101,6 +102,13 @@ export default class GDHourList extends Component<Props> {
         HTTPBase.get('http://guangdiu.com/api/getranklist.php',params)
             .then(responseData => {
 
+
+                let isNextTouch=true;
+                if (responseData.hasnexthour==1){
+                    isNextTouch=false;
+                }
+
+
                 //暂时保存数据
                 this.nexthourhour=responseData.nexthourhour;
                 this.nexthourdate=responseData.nexthourdate;
@@ -109,7 +117,8 @@ export default class GDHourList extends Component<Props> {
                 this.setState({
 
 
-                    prompt:responseData.displaydate+responseData.rankhour+'点档'+'('+responseData.rankduring+')'
+                    prompt:responseData.displaydate+responseData.rankhour+'点档'+'('+responseData.rankduring+')',
+                    isNextTouch:isNextTouch
 
                 })
 
@@ -372,7 +381,7 @@ export default class GDHourList extends Component<Props> {
     }
 
     // 下一小时
-    nextHour() {
+    nextHour() {                                                                            
         let type=0;
         this.fetchData(type,this.nexthourdate,this.nexthourhour);
 
@@ -406,8 +415,10 @@ export default class GDHourList extends Component<Props> {
                         <Text style={{marginRight: 10, fontSize: 17, color: 'green'}}>{"<" + "上一小时"}</Text>
 
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => this.nextHour()}>
-                        <Text style={{marginLeft: 10, fontSize: 17, color: 'green'}}>{"下一小时" + ">"}</Text>
+                    <TouchableOpacity onPress={() => this.nextHour()}
+                                      disabled={this.state.isNextTouch}
+                    >
+                        <Text style={{marginLeft: 10, fontSize: 17, color: this.state.isNextTouch ===false ?'green':'gray'}}>{"下一小时" + ">"}</Text>
 
                     </TouchableOpacity>
 
