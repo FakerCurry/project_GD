@@ -43,6 +43,11 @@ import NoDataView from "../main/GDNoData";
 
 import CommunalCell from "../main/GDCommunalCell";
 
+import CommunalSiftMenu from '../main/GDCommunalSiftMenu';
+
+//数据
+import HomeSiftData from '../data/HomeSiftData';
+
 
 
 const {width, height} = Dimensions.get("window");
@@ -61,7 +66,8 @@ export default class GDHome extends Component<Props> {
             loaded: false,
             refreshState: RefreshState.Idle,
             isRefreshing: false,
-            isModal: false
+            isHalfHourHotModal: false,
+            isSiftModal:false,
 
         };
 
@@ -244,6 +250,80 @@ export default class GDHome extends Component<Props> {
     }
 
 
+
+
+
+   //mall 商城
+    loadByMall(mall,cate) {
+        let params={} ;
+
+        if (mall===""&&cate===""){//全部
+
+            let type=0;
+            this.fetchData(type)
+            return;
+        }
+
+
+         if (mall===""){  //cate优质
+
+            params={
+
+                "cate":cate
+            };
+        }else {
+
+            params={
+                "mall":mall
+
+            }
+        }
+
+
+
+        HTTPBase.post('http://guangdiu.com/api/getlist.php', params)
+            .then(responseData => {
+
+
+
+
+
+
+                    this.data=responseData.data;
+
+                    this.setState({
+
+                        dataSource: this.data,
+                        loaded: true
+
+                    })
+
+
+
+
+
+
+                //存储数组中最后一个元素的id
+                let cnlastID = responseData.data[responseData.data.length - 1].id;
+
+                AsyncStorage.setItem('cnlastID', cnlastID.toString());
+
+
+
+
+
+
+
+            }).catch((error) => {
+
+
+
+        }).done()
+
+
+    }
+
+
     //判断是否有数据
     renderFlatView() {
 
@@ -352,7 +432,7 @@ export default class GDHome extends Component<Props> {
 
         this.setState({
 
-            isModal: true
+            isHalfHourHotModal: true
         })
     }
 
@@ -373,14 +453,13 @@ export default class GDHome extends Component<Props> {
 
     }
 
-    showID() {
+    showSiftMenu() {
 
-        //读取存储的id
-        AsyncStorage.getItem('cnlastID')
-            .then((value) => {
+      this.setState({
 
-                Alert.alert(value)
-            })
+          isSiftModal:true
+
+      })
     }
 
     //返回中间按钮
@@ -388,7 +467,7 @@ export default class GDHome extends Component<Props> {
         return (
             <TouchableOpacity
                 onPress={() => {
-                    this.showID()
+                    this.showSiftMenu()
 
                 }}
             >
@@ -431,7 +510,8 @@ export default class GDHome extends Component<Props> {
     onRequestClose() {
 
         this.setState({
-            isModal: false
+            isHalfHourHotModal: false,
+            isSiftModal:false,
 
         })
 
@@ -439,7 +519,8 @@ export default class GDHome extends Component<Props> {
 
     closeModal(data) {
         this.setState({
-            isModal: false
+            isHalfHourHotModal: data,
+            isSiftModal:data
 
         })
 
@@ -450,30 +531,45 @@ export default class GDHome extends Component<Props> {
         return (
             <View style={styles.container}>
 
-                {/*初始化模态*/}
+                {/*初始化近半小时热门模态*/}
                 <Modal animationType='slide'
                        transparent={false}
-                       visible={this.state.isModal}
+                       visible={this.state.isHalfHourHotModal}
                        onRequestClose={() => this.onRequestClose()}>
                     <Navigator
-                    initialRoute={{
-                        name:'halfHourHot',
-                        component:HalfHourHot
+                        initialRoute={{
+                            name:'halfHourHot',
+                            component:HalfHourHot
 
 
-                    }}
+                        }}
 
-                    renderScene={(route,navigator)=>{
+                        renderScene={(route,navigator)=>{
 
-                        let Component = route.component;
-                        return   <Component removeModal={(data) => this.closeModal(data)}
-                        {...route.params} navigator={navigator}/>
-                    }}
+                            let Component = route.component;
+                            return   <Component removeModal={(data) => this.closeModal(data)}
+                                                {...route.params} navigator={navigator}/>
+                        }}
                     />
 
 
 
                 </Modal>
+
+
+                {/*初始化筛选菜单模态*/}
+                <Modal animationType='none'
+                       transparent={true}
+                       visible={this.state.isSiftModal}
+                       onRequestClose={() => this.onRequestClose()}>
+                 <CommunalSiftMenu  removeModal={(data) => this.closeModal(data)}
+                 data={HomeSiftData}   loadByMall={(mall,cate)=>this.loadByMall(mall,cate)}
+                 />
+
+
+
+                </Modal>
+
                 {/*导航栏样式*/}
                 <CommunalNavBar
                     leftItem={() => this.renderLeftItem()}

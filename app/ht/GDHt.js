@@ -43,6 +43,9 @@ import NoDataView from "../main/GDNoData";
 
 
 import CommunalCell from "../main/GDCommunalCell";
+import CommunalSiftMenu from "../main/GDCommunalSiftMenu";
+import HTSiftData from "../data/HTSiftData";
+import HalfHourHot from "../home/GDHalfHourHot";
 
 
 const {width, height} = Dimensions.get("window");
@@ -61,7 +64,8 @@ export default class GDHt extends Component<Props> {
             loaded: false,
             refreshState: RefreshState.Idle,
             isRefreshing: false,
-            isModal: false
+            isHalfHourHotModal:false,
+            isUSSiftModal:false,
 
         };
 
@@ -187,6 +191,82 @@ export default class GDHt extends Component<Props> {
 
 
     }
+
+
+
+
+    //mall 商城
+    loadByMall(mall,cate) {
+        let params={} ;
+
+        if (mall===""&&cate===""){//全部
+
+            let type=0;
+            this.fetchData(type)
+            return;
+        }
+
+
+        if (mall===""){  //cate优质
+
+            params={
+
+                "cate":cate
+                ,"country":"us"
+            };
+        }else {
+
+            params={
+                "mall":mall
+                ,"country":"us"
+
+            }
+        }
+
+
+
+        HTTPBase.post('http://guangdiu.com/api/getlist.php', params)
+            .then(responseData => {
+
+
+
+
+
+
+                this.data=responseData.data;
+
+                this.setState({
+
+                    dataSource: this.data,
+                    loaded: true
+
+                })
+
+
+
+
+
+
+                //存储数组中最后一个元素的id
+                let uslastID = responseData.data[responseData.data.length - 1].id;
+
+                AsyncStorage.setItem('uslastID', uslastID.toString());
+
+
+
+
+
+
+
+            }).catch((error) => {
+
+
+
+        }).done()
+
+
+    }
+
 
 
     componentDidMount() {
@@ -329,7 +409,14 @@ export default class GDHt extends Component<Props> {
 
 
     }
+    showSiftMenu() {
 
+        this.setState({
+
+            isUSSiftModal:true,
+
+        })
+    }
 
 //跳转到半个小时热门
     pushToHalfHourHot() {
@@ -341,7 +428,7 @@ export default class GDHt extends Component<Props> {
 
         this.setState({
 
-            isModal: true
+            isHalfHourHotModal: true
         })
     }
 
@@ -368,7 +455,10 @@ export default class GDHt extends Component<Props> {
     renderTitleItem() {
         return (
             <TouchableOpacity
+                onPress={() => {
+                    this.showSiftMenu()
 
+                }}
             >
                 <Image source={{uri: 'navtitle_home_down_66x20'}} style={styles.navbarTitleItemStyle}/>
 
@@ -409,7 +499,8 @@ export default class GDHt extends Component<Props> {
     onRequestClose() {
 
         this.setState({
-            isModal: false
+            isHalfHourHotModal:false,
+            isUSSiftModal:false,
 
         })
 
@@ -417,7 +508,8 @@ export default class GDHt extends Component<Props> {
 
     closeModal(data) {
         this.setState({
-            isModal: false
+            isHalfHourHotModal:data,
+            isUSSiftModal:data,
 
         })
 
@@ -431,7 +523,7 @@ export default class GDHt extends Component<Props> {
                 {/*初始化模态*/}
                 <Modal animationType='slide'
                        transparent={false}
-                       visible={this.state.isModal}
+                       visible={this.state.isHalfHourHotModal}
                        onRequestClose={() => this.onRequestClose()}>
                     <Navigator
                         initialRoute={{
@@ -452,6 +544,24 @@ export default class GDHt extends Component<Props> {
 
 
                 </Modal>
+
+
+
+
+
+                {/*初始化筛选菜单模态*/}
+                <Modal animationType='none'
+                       transparent={true}
+                       visible={this.state.isUSSiftModal}
+                       onRequestClose={() => this.onRequestClose()}>
+                    <CommunalSiftMenu  removeModal={(data) => this.closeModal(data)}
+                                       data={HTSiftData}   loadByMall={(mall,cate)=>this.loadByMall(mall,cate)}
+                    />
+
+
+
+                </Modal>
+
                 {/*导航栏样式*/}
                 <CommunalNavBar
                     leftItem={() => this.renderLeftItem()}
