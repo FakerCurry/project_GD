@@ -20,7 +20,12 @@ import {
     RefreshControl,
     Modal,
     AsyncStorage,
-    Text
+    Text,
+    InteractionManager,
+    Animated,
+    Easing,
+
+
 } from 'react-native';
 
 //第三方
@@ -61,8 +66,13 @@ export default class GDHourList extends Component<Props> {
             refreshState: RefreshState.Idle,
             isRefreshing: false,
             isModal: false,
-            prompt:'',
-            isNextTouch:false
+            prompt: '',
+            isNextTouch: false,
+
+// 动画测试
+            fadeInOpacity: new Animated.Value(0),
+            rotation: new Animated.Value(0),
+            fontSize: new Animated.Value(0)
 
 
         };
@@ -70,10 +80,10 @@ export default class GDHourList extends Component<Props> {
         this.data = [];
         this.nowHour = 0;
 
-        this.nexthourhour="";
-        this.nexthourdate="";
-        this.lasthourhour="";
-        this.lasthourdate="";
+        this.nexthourhour = "";
+        this.nexthourdate = "";
+        this.lasthourhour = "";
+        this.lasthourdate = "";
 
         //需要绑定
         this.fetchData = this.fetchData.bind(this)
@@ -83,42 +93,41 @@ export default class GDHourList extends Component<Props> {
 
     //网络请求的方法
     //type 0:普通请求    1：下拉刷新   2：上拉加载
-    fetchData(type,date,hour) {
+    fetchData(type, date, hour) {
 
 
-        let params={};
-        
+        let params = {};
+
         if (date) {
 
-            params={
-                "date":date,
-                "hour":hour
+            params = {
+                "date": date,
+                "hour": hour
 
             }
         }
-        
 
 
-        HTTPBase.get('http://guangdiu.com/api/getranklist.php',params)
+        HTTPBase.get('http://guangdiu.com/api/getranklist.php', params)
             .then(responseData => {
 
 
-                let isNextTouch=true;
-                if (responseData.hasnexthour==1){
-                    isNextTouch=false;
+                let isNextTouch = true;
+                if (responseData.hasnexthour == 1) {
+                    isNextTouch = false;
                 }
 
 
                 //暂时保存数据
-                this.nexthourhour=responseData.nexthourhour;
-                this.nexthourdate=responseData.nexthourdate;
-                this.lasthourhour=responseData.lasthourhour;
-                this.lasthourdate=responseData.lasthourdate;
+                this.nexthourhour = responseData.nexthourhour;
+                this.nexthourdate = responseData.nexthourdate;
+                this.lasthourhour = responseData.lasthourhour;
+                this.lasthourdate = responseData.lasthourdate;
                 this.setState({
 
 
-                    prompt:responseData.displaydate+responseData.rankhour+'点档'+'('+responseData.rankduring+')',
-                    isNextTouch:isNextTouch
+                    prompt: responseData.displaydate + responseData.rankhour + '点档' + '(' + responseData.rankduring + ')',
+                    isNextTouch: isNextTouch
 
                 })
 
@@ -134,9 +143,6 @@ export default class GDHourList extends Component<Props> {
                     })
 
 
-
-
-
                 } else if (type === 1) {
 
                     this.data = responseData.data;
@@ -149,14 +155,10 @@ export default class GDHourList extends Component<Props> {
                     })
 
 
-
-
                 }
 
 
             }).catch((error) => {
-
-
 
 
         }).done()
@@ -165,13 +167,31 @@ export default class GDHourList extends Component<Props> {
     }
 
 
-
-
     componentDidMount() {
+
+
+        // this.startAn();
+
+
         let type = 0;
 
         this.fetchData(type);
 
+
+    }
+
+    //启动动画
+    startAn(){
+
+
+        var timing = Animated.timing;
+        Animated.parallel(['fadeInOpacity', 'rotation', 'fontSize'].map(property => {
+            return timing(this.state[property], {
+                toValue: 1,
+                duration: 1000,
+                easing: Easing.linear
+            });
+        })).start();
     }
 
 
@@ -256,14 +276,19 @@ export default class GDHourList extends Component<Props> {
     //跳转到详情页
     pushToDetail(value) {
 
-        this.props.navigator.push({
+        InteractionManager.runAfterInteractions(() => {
+            this.props.navigator.push({
 
 
-            component: CommunalDetail,
-            params: {
-                url: 'https://guangdiu.com/api/showdetail.php' + '?' + 'id=' + value
-            }
-        })
+                component: CommunalDetail,
+                params: {
+                    url: 'https://guangdiu.com/api/showdetail.php' + '?' + 'id=' + value
+                }
+            })
+
+        });
+
+
     }
 
 
@@ -273,7 +298,7 @@ export default class GDHourList extends Component<Props> {
 
         this.props.navigator.push({
 
-            component:Settings,
+            component: Settings,
 
 
         })
@@ -308,16 +333,41 @@ export default class GDHourList extends Component<Props> {
 
     }
 
+    //动画的实现
+    animatedTest() {
+        <Animated.View style={[styles.demo, {
+            opacity: this.state.fadeInOpacity,
+            transform: [{
+                rotateZ: this.state.rotation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '360deg']
+                })
+            }]
+        }]}><Animated.Text style={{
+            fontSize: this.state.fontSize.interpolate({
+                inputRange: [0, 1],
+                outputRange: [12, 26]
+            })
+        }}>我骑着七彩祥云出现了😈💨</Animated.Text>
+        </Animated.View>
+
+
+    }
+
 
     //返回中间按钮
     renderTitleItem() {
         return (
+
+
             <TouchableOpacity>
                 <Image source={{uri: 'navtitle_rank_106x20'}} style={styles.navbarTitleItemStyle}/>
 
             </TouchableOpacity>
 
-        );
+
+        )
+            ;
 
 
     }
@@ -328,12 +378,12 @@ export default class GDHourList extends Component<Props> {
         return (
 
             <TouchableOpacity
-                onPress={()=>{
+                onPress={() => {
                     this.pushToSetting()
 
                 }}
             >
-                <Text style={styles.navbarRightItemStyle}>设置</Text>
+                <Text style={styles.navbarRightItemStyle}>设置好</Text>
 
             </TouchableOpacity>
 
@@ -375,15 +425,15 @@ export default class GDHourList extends Component<Props> {
     lastHour() {
 
 
-        let type=0;
-        this.fetchData(type,this.lasthourdate,this.lasthourhour);
+        let type = 0;
+        this.fetchData(type, this.lasthourdate, this.lasthourhour);
 
     }
 
     // 下一小时
     nextHour() {
-        let type=0;
-        this.fetchData(type,this.nexthourdate,this.nexthourhour);
+        let type = 0;
+        this.fetchData(type, this.nexthourdate, this.nexthourhour);
 
     }
 
@@ -418,7 +468,11 @@ export default class GDHourList extends Component<Props> {
                     <TouchableOpacity onPress={() => this.nextHour()}
                                       disabled={this.state.isNextTouch}
                     >
-                        <Text style={{marginLeft: 10, fontSize: 17, color: this.state.isNextTouch ===false ?'green':'gray'}}>{"下一小时" + ">"}</Text>
+                        <Text style={{
+                            marginLeft: 10,
+                            fontSize: 17,
+                            color: this.state.isNextTouch === false ? 'green' : 'gray'
+                        }}>{"下一小时" + ">"}</Text>
 
                     </TouchableOpacity>
 
@@ -466,5 +520,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
 
-    }
+    },
+
+    flatlistStyle: {
+        width: width,
+
+    },
+    demo: {}
 });

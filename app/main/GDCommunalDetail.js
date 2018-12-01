@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {StyleSheet, Text, View,Dimensions,WebView,TouchableOpacity, DeviceEventEmitter} from 'react-native';
+import {StyleSheet, Text, View, Dimensions, WebView, TouchableOpacity, DeviceEventEmitter, Image} from 'react-native';
 
 import PropTypes from 'prop-types';
 const  {width, height} =Dimensions.get('window');
@@ -45,7 +45,11 @@ export default class GDCommualHotCell extends Component<Props> {
             <TouchableOpacity
                 onPress={()=>this.popBack()}
             >
-                <Text>返回</Text>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Image source={{uri: 'back'}} style={styles.navbarLeftItemStyle}/>
+
+                    <Text>返回</Text>
+                </View>
             </TouchableOpacity>
 
         );
@@ -98,5 +102,12 @@ const styles = StyleSheet.create({
     },
     webViewStyle:{
         flex:1
+    },
+    navbarLeftItemStyle: {
+        width: 20,
+        height: 20,
+        marginLeft: 15,
+
+
     }
 });

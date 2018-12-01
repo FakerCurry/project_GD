@@ -20,7 +20,8 @@ import {
     RefreshControl,
     Modal,
     AsyncStorage,
-    DeviceEventEmitter
+    DeviceEventEmitter,
+    InteractionManager
 } from 'react-native';
 
 //第三方
@@ -77,14 +78,18 @@ export default class GDHome extends Component<Props> {
             isHalfHourHotModal: false,
             isSiftModal:false,
 
+
         };
 
+
         this.data=[]
-        this.list=null;
+        this.list=null
+        this.offSet=0
 
         //需要绑定
         this.fetchData = this.fetchData.bind(this)
         this.renderItem=this.renderItem.bind(this)
+        this._onScroll=this._onScroll.bind(this)
     }
 
 
@@ -122,7 +127,6 @@ export default class GDHome extends Component<Props> {
 
         HTTPBase.post('http://guangdiu.com/api/getlist.php', params, {})
             .then(responseData => {
-
 
 
 
@@ -232,8 +236,19 @@ export default class GDHome extends Component<Props> {
 
 
     clickTabBarItem() {
-//一见置顶
+
+        if (this.offSet>0){
+            //一见置顶
         this.list.scrollToIndex({ viewPosition: 0, index: 0 });
+
+        } else {
+
+
+            this.onHeaderRefresh()
+        }
+
+
+
 
     }
 
@@ -253,9 +268,15 @@ export default class GDHome extends Component<Props> {
     }
 
 
+    componentWillUnmount() {
+        this.subscription.remove();
+    }
+
     onHeaderRefresh = () => {
         // this.setState({ refreshState: RefreshState.HeaderRefreshing
         // })
+
+
 
         this.setState({
 
@@ -365,6 +386,15 @@ export default class GDHome extends Component<Props> {
     }
 
 
+
+    _onScroll=(event)=> {
+
+        this.offSet = event.nativeEvent.contentOffset.y;
+    }
+
+
+
+
     //判断是否有数据
     renderFlatView() {
 
@@ -399,6 +429,9 @@ export default class GDHome extends Component<Props> {
 
                     style={styles.flatlistStyle}
 
+
+                    onScroll={this._onScroll}
+
                     refreshControl={
                         <RefreshControl
                             refreshing={this.state.isRefreshing}
@@ -413,6 +446,11 @@ export default class GDHome extends Component<Props> {
                             progressBackgroundColor="#ffff00"/>
 
                     }
+
+
+
+
+
                 />
 
             );
@@ -424,14 +462,19 @@ export default class GDHome extends Component<Props> {
     //跳转到详情页
     pushToDetail(value){
 
-        this.props.navigator.push({
-        
-        
-            component:CommunalDetail,
-            params:{
-                url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
-            }   
-        })
+        InteractionManager.runAfterInteractions(()=>{
+            this.props.navigator.push({
+
+
+                component:CommunalDetail,
+                params:{
+                    url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
+                }
+            })
+
+        });
+
+
     }
     
 
@@ -574,6 +617,17 @@ export default class GDHome extends Component<Props> {
         return (
             <View style={styles.container}>
 
+
+
+                {/*导航栏样式*/}
+                <CommunalNavBar
+                    leftItem={() => this.renderLeftItem()}
+                    titleItem={() => this.renderTitleItem()}
+                    rightItem={() => this.renderRightItem()}
+                />
+                {/*根据网络状态局部渲染FlatView*/}
+                {this.renderFlatView()}
+
                 {/*初始化近半小时热门模态*/}
                 <Modal animationType='slide'
                        transparent={false}
@@ -605,22 +659,13 @@ export default class GDHome extends Component<Props> {
                        transparent={true}
                        visible={this.state.isSiftModal}
                        onRequestClose={() => this.onRequestClose()}>
-                 <CommunalSiftMenu  removeModal={(data) => this.closeModal(data)}
-                 data={HomeSiftData}   loadByMall={(mall,cate)=>this.loadByMall(mall,cate)}
-                 />
+                    <CommunalSiftMenu  removeModal={(data) => this.closeModal(data)}
+                                       data={HomeSiftData}   loadByMall={(mall,cate)=>this.loadByMall(mall,cate)}
+                    />
 
 
 
                 </Modal>
-
-                {/*导航栏样式*/}
-                <CommunalNavBar
-                    leftItem={() => this.renderLeftItem()}
-                    titleItem={() => this.renderTitleItem()}
-                    rightItem={() => this.renderRightItem()}
-                />
-                {/*根据网络状态局部渲染FlatView*/}
-                {this.renderFlatView()}
 
             </View>
         );

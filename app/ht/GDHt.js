@@ -20,6 +20,7 @@ import {
     RefreshControl,
     Modal,
     AsyncStorage, DeviceEventEmitter
+    ,InteractionManager
 } from 'react-native';
 
 //第三方
@@ -78,10 +79,12 @@ export default class GDHt extends Component<Props> {
 
         this.data=[]
         this.list=null;
+        this.offSet=0
 
         //需要绑定
         this.fetchData = this.fetchData.bind(this)
         this.renderItem=this.renderItem.bind(this)
+        this._onScroll=this._onScroll.bind(this)
     }
 
 
@@ -295,8 +298,17 @@ export default class GDHt extends Component<Props> {
     clickTabBarItem(){
 
 
-        //一见置顶
-        this.list.scrollToIndex({ viewPosition: 0, index: 0 });
+
+        if (this.offSet>0){
+            //一见置顶
+            this.list.scrollToIndex({ viewPosition: 0, index: 0 });
+
+        } else {
+
+
+            this.onHeaderRefresh()
+        }
+
 
     }
 
@@ -311,6 +323,9 @@ export default class GDHt extends Component<Props> {
 
     }
 
+    componentWillUnmount() {
+        this.subscription.remove();
+    }
 
     onHeaderRefresh = () => {
         // this.setState({ refreshState: RefreshState.HeaderRefreshing
@@ -350,6 +365,11 @@ export default class GDHt extends Component<Props> {
     }
 
 
+    _onScroll=(event)=> {
+
+        this.offSet = event.nativeEvent.contentOffset.y;
+    }
+
     //判断是否有数据
     renderFlatView() {
 
@@ -382,7 +402,7 @@ export default class GDHt extends Component<Props> {
                     footerEmptyDataText='-好像什么东西都没有-'
 
                     style={styles.flatlistStyle}
-
+                    onScroll={this._onScroll}
                     refreshControl={
                         <RefreshControl
                             refreshing={this.state.isRefreshing}
@@ -408,14 +428,19 @@ export default class GDHt extends Component<Props> {
     //跳转到详情页
     pushToDetail(value){
 
-        this.props.navigator.push({
+        InteractionManager.runAfterInteractions(()=>{
+            this.props.navigator.push({
 
 
-            component:CommunalDetail,
-            params:{
-                url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
-            }
+                component:CommunalDetail,
+                params:{
+                    url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
+                }
+            })
+
         })
+
+
     }
 
 
@@ -557,6 +582,17 @@ export default class GDHt extends Component<Props> {
         return (
             <View style={styles.container}>
 
+
+
+                {/*导航栏样式*/}
+                <CommunalNavBar
+                    leftItem={() => this.renderLeftItem()}
+                    titleItem={() => this.renderTitleItem()}
+                    rightItem={() => this.renderRightItem()}
+                />
+                {/*根据网络状态局部渲染FlatView*/}
+                {this.renderFlatView()}
+
                 {/*初始化模态*/}
                 <Modal animationType='slide'
                        transparent={false}
@@ -599,15 +635,6 @@ export default class GDHt extends Component<Props> {
 
                 </Modal>
 
-                {/*导航栏样式*/}
-                <CommunalNavBar
-                    leftItem={() => this.renderLeftItem()}
-                    titleItem={() => this.renderTitleItem()}
-                    rightItem={() => this.renderRightItem()}
-                />
-                {/*根据网络状态局部渲染FlatView*/}
-                {this.renderFlatView()}
-
             </View>
         );
     }
@@ -646,3 +673,4 @@ const styles = StyleSheet.create({
 });
 
 
+ 

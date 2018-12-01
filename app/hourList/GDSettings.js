@@ -105,6 +105,10 @@ export default class GDSettings extends Component<Props> {
                     <SettingsCell leftTitle="清理图片缓存"
                                   isShowSwitch={false}/>
 
+
+
+
+
                 </ScrollView>
             </View>
 

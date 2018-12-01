@@ -9,7 +9,7 @@
 import React, {Component} from 'react';
 import {
     Platform, StyleSheet, Text, View, FlatList, Image, TouchableOpacity, Dimensions
-    , DeviceEventEmitter
+    , DeviceEventEmitter,InteractionManager
 } from 'react-native';
 
 
@@ -174,14 +174,19 @@ export default class GDUSHalfHourHot extends Component<Props> {
     //跳转到详情页
     pushToDetail(value){
 
-        this.props.navigator.push({
+        InteractionManager.runAfterInteractions(()=>{
+            this.props.navigator.push({
 
 
-            component:CommunalDetail,
-            params:{
-                url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
-            }
+                component:CommunalDetail,
+                params:{
+                    url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
+                }
+            })
+
         })
+
+
     }
 
     popToHome(data) {
