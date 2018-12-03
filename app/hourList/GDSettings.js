@@ -9,7 +9,7 @@
 import React, {Component} from 'react';
 import {
     Image, Platform, StyleSheet, Text, TouchableOpacity, View,
-    ScrollView, DeviceEventEmitter
+    ScrollView, DeviceEventEmitter, BackHandler
 } from 'react-native';
 
 import PropTypes from 'prop-types';
@@ -26,6 +26,10 @@ export default class GDSettings extends Component<Props> {
 
     componentWillMount() {
         DeviceEventEmitter.emit('isHiddenTabBar', true);
+
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackHandler);
+        }
     }
 
 
@@ -34,7 +38,22 @@ export default class GDSettings extends Component<Props> {
 
         DeviceEventEmitter.emit('isHiddenTabBar', false);
 
+        if (Platform.OS === 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackHandler);
+        }
+
     }
+
+
+
+
+
+    onBackHandler = () => {
+
+        this.pop();
+        return true;
+    };
+
 
 
     pop() {

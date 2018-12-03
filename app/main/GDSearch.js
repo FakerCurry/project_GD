@@ -21,7 +21,7 @@ import {
     Modal,
     AsyncStorage,
     TextInput,
-    Text, DeviceEventEmitter
+    Text, DeviceEventEmitter, BackHandler
 } from 'react-native';
 
 //第三方
@@ -169,6 +169,10 @@ export default class GDHome extends Component<Props> {
 
     componentWillMount() {
         DeviceEventEmitter.emit('isHiddenTabBar', true);
+
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackHandler);
+        }
     }
 
 
@@ -177,7 +181,21 @@ export default class GDHome extends Component<Props> {
 
         DeviceEventEmitter.emit('isHiddenTabBar', false);
 
+        if (Platform.OS === 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackHandler);
+        }
+
     }
+
+
+
+
+
+    onBackHandler = () => {
+
+        this.pop();
+        return true;
+    };
 
 
     onHeaderRefresh = () => {

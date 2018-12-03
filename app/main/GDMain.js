@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Image, DeviceEventEmitter, AsyncStorage} from 'react-native';
+import {Platform, StyleSheet, Text, View, Image, DeviceEventEmitter, AsyncStorage, BackHandler} from 'react-native';
 
 const instructions = Platform.select({
     ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -21,7 +21,7 @@ import TabNavigator from 'react-native-tab-navigator';
 //https://blog.csdn.net/s8460049/article/details/73331043
 import {Navigator} from 'react-native-deprecated-custom-components';
 
-
+import RNExitApp from 'react-native-exit-app';
 //饮用外部文件
 import Home from '../home/GDHome';
 import Ht from '../ht/GDHt';
@@ -164,6 +164,9 @@ export default class GDMain extends Component<Props> {
 
 // 组建加载完成
     componentDidMount() {
+
+
+
         this.subscription = DeviceEventEmitter.addListener('isHiddenTabBar', (data) => {
 
             this.tongZhi(data)
@@ -190,7 +193,45 @@ export default class GDMain extends Component<Props> {
 // 组建即将销毁
     componentWillUnmount() {
         this.subscription.remove()
+
+        if (Platform.OS === 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackHandler);
+        }
+
+
     }
+
+
+
+
+    componentWillMount() {
+
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackHandler);
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    onBackHandler = () => {
+
+        RNExitApp.exitApp();
+        return true;
+    };
+
 
     render() {
         return (

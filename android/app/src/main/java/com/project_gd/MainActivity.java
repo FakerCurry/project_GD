@@ -1,6 +1,7 @@
 package com.project_gd;
 
 import com.facebook.react.ReactActivity;
+import com.facebook.react.ReactInstanceManager;
 
 public class MainActivity extends ReactActivity {
 
@@ -12,4 +13,16 @@ public class MainActivity extends ReactActivity {
     protected String getMainComponentName() {
         return "project_GD";
     }
+
+    private ReactInstanceManager mReactInstanceManager;
+
+    @Override
+    public void invokeDefaultOnBackPressed() {
+        if (mReactInstanceManager != null) {
+            mReactInstanceManager.onBackPressed();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 }

@@ -9,7 +9,7 @@
 import React, {Component} from 'react';
 import {
     Platform, StyleSheet, Text, View, FlatList, Image, TouchableOpacity, Dimensions
-    , DeviceEventEmitter,InteractionManager
+    , DeviceEventEmitter, InteractionManager, BackHandler
 } from 'react-native';
 
 
@@ -17,7 +17,6 @@ import {
 import CommunalNavBar from '../main/GDCommunalNavBar';
 import CommunalHotCell from '../main/GDCommualHotCell';
 import NoDataView from '../main/GDNoData'
-
 
 
 //第三方
@@ -45,7 +44,7 @@ export default class GDHalfHourHot extends Component<Props> {
         };
         //需要绑定
         this.fetchData = this.fetchData.bind(this)
-        this.renderItem=this.renderItem.bind(this)
+        this.renderItem = this.renderItem.bind(this)
     }
 
     static defaultProps = {
@@ -77,21 +76,39 @@ export default class GDHalfHourHot extends Component<Props> {
 
     }
 
+    //组件加载完成
     componentDidMount() {
         this.fetchData();
     }
 
+
+    //将要加载组件
     componentWillMount() {
         DeviceEventEmitter.emit('isHiddenTabBar', true);
+
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackHandler);
+        }
     }
 
-
-
+// 将要卸载组件
     componentWillUnmount() {
 
         DeviceEventEmitter.emit('isHiddenTabBar', false);
 
+        if (Platform.OS === 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackHandler);
+        }
+
     }
+
+  // android按返回键
+    onBackHandler = () => {
+
+        this.popToHome(false);
+        return true;
+    };
+
 
     // onPullRelease(resolve) {
     //     //do something
@@ -169,15 +186,15 @@ export default class GDHalfHourHot extends Component<Props> {
 
 
     //跳转到详情页
-    pushToDetail(value){
-        InteractionManager.runAfterInteractions(()=>{
+    pushToDetail(value) {
+        InteractionManager.runAfterInteractions(() => {
 
             this.props.navigator.push({
 
 
-                component:CommunalDetail,
-                params:{
-                    url:'https://guangdiu.com/api/showdetail.php'+'?'+'id='+ value
+                component: CommunalDetail,
+                params: {
+                    url: 'https://guangdiu.com/api/showdetail.php' + '?' + 'id=' + value
                 }
             })
 

@@ -11,12 +11,13 @@
     "react": "16.6.1",
     "react-native": "0.57.5",
     "react-native-deprecated-custom-components": "^0.1.2",
+    "react-native-exit-app": "^1.0.0",
     "react-native-gesture-handler": "^1.0.9",
     "react-native-pull": "^2.0.2",
     "react-native-refresh-list-view": "^1.0.10",
     "react-native-spring-scrollview": "^0.0.24",
     "react-native-tab-navigator": "^0.3.4",
-    "realm": "^2.20.0"
+    "realm": "^2.20.1"
   },
   "devDependencies": {
     "babel-jest": "23.6.0",

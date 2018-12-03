@@ -7,7 +7,17 @@
  */
 
 import React, {Component} from 'react';
-import {StyleSheet, Text, View, Dimensions, WebView, TouchableOpacity, DeviceEventEmitter, Image} from 'react-native';
+import {
+    StyleSheet,
+    Text,
+    View,
+    Dimensions,
+    WebView,
+    TouchableOpacity,
+    DeviceEventEmitter,
+    Image,
+    Platform, BackHandler
+} from 'react-native';
 
 import PropTypes from 'prop-types';
 const  {width, height} =Dimensions.get('window');
@@ -35,7 +45,12 @@ export default class GDCommualHotCell extends Component<Props> {
         this.props.navigator.pop();
         
     }
-    
+
+
+
+
+
+
 
 //返回左边按钮
     renderLeftItem() {
@@ -59,6 +74,10 @@ export default class GDCommualHotCell extends Component<Props> {
 
     componentWillMount() {
         DeviceEventEmitter.emit('isHiddenTabBar', true);
+
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackHandler);
+        }
     }
 
 
@@ -67,7 +86,27 @@ export default class GDCommualHotCell extends Component<Props> {
 
         DeviceEventEmitter.emit('isHiddenTabBar', false);
 
+
+        if (Platform.OS === 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackHandler);
+        }
+
     }
+
+
+
+
+
+
+
+
+
+
+    onBackHandler = () => {
+
+        this.props.navigator.pop();
+        return true;
+    };
 
 
 

@@ -9,7 +9,7 @@
 import React, {Component} from 'react';
 import {
     Platform, StyleSheet, Text, View, FlatList, Image, TouchableOpacity, Dimensions
-    , DeviceEventEmitter,InteractionManager
+    , DeviceEventEmitter, InteractionManager, BackHandler
 } from 'react-native';
 
 
@@ -81,20 +81,45 @@ export default class GDUSHalfHourHot extends Component<Props> {
     }
 
 
-    componentWillMount() {
-        DeviceEventEmitter.emit('isHiddenTabBar', true);
-    }
 
 
     componentDidMount() {
         this.fetchData();
     }
 
+
+
+
+
+    componentWillMount() {
+        DeviceEventEmitter.emit('isHiddenTabBar', true);
+
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackHandler);
+        }
+    }
+
+
+
     componentWillUnmount() {
 
         DeviceEventEmitter.emit('isHiddenTabBar', false);
 
+        if (Platform.OS === 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackHandler);
+        }
+
     }
+
+
+
+
+
+    onBackHandler = () => {
+
+        this.popToHome(false);
+        return true;
+    };
 
     // onPullRelease(resolve) {
     //     //do something
