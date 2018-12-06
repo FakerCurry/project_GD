@@ -14,6 +14,7 @@ const {width, height} = Dimensions.get('window');
 
 //引入外部文件
 import Main from './GDMain';
+import SlideMenu from '../slidemenu/GDSlidemenuMain'
 
 type Props = {};
 export default class GDLaunchPage extends Component<Props> {
@@ -24,7 +25,7 @@ export default class GDLaunchPage extends Component<Props> {
 
             this.props.navigator.replace({
 
-                component: Main
+                component: SlideMenu
             })
 
         }, 1500)

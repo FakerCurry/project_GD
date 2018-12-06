@@ -144,8 +144,7 @@ dependencies {
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
-//    // 如果你需要支持GIF动图
-//    compile 'com.facebook.fresco:animated-gif:1.5.0'
+
 
 
 }

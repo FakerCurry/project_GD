@@ -32,6 +32,9 @@ type Props = {};
 export default class GDHalfHourHot extends Component<Props> {
 
 
+
+
+
     constructor(props) {
         super(props);
 

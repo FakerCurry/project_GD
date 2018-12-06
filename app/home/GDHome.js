@@ -522,17 +522,33 @@ export default class GDHome extends Component<Props> {
         })
     }
 
+    //打开左侧menu
+    openMenu() {
+        DeviceEventEmitter.emit('menuDEE', true);
+
+    }
     //返回左边按钮
     renderLeftItem() {
 
         return (
 
-            <TouchableOpacity onPress={() => {
-                this.pushToHalfHourHot()
-            }}>
-                <Image source={{uri: 'hot_icon_20x20'}} style={styles.navbarLeftItemStyle}/>
+            <View style={styles.leftViewStyle}>
+                <TouchableOpacity onPress={() => {
+                    this.openMenu()
+                }}>
+                    <Image source={{uri: 'drawer_avatar'}} style={styles.navbarLeftAvatarStyle}/>
 
-            </TouchableOpacity>
+                </TouchableOpacity>
+
+                {/*<TouchableOpacity onPress={() => {*/}
+                    {/*this.pushToHalfHourHot()*/}
+                {/*}}>*/}
+                    {/*<Image source={{uri: 'hot_icon_20x20'}} style={styles.navbarLeftItemStyle}/>*/}
+
+                {/*</TouchableOpacity>*/}
+            </View>
+
+
 
         );
 
@@ -689,17 +705,26 @@ const styles = StyleSheet.create({
     navbarTitleItemStyle: {
         width: 66,
         height: 20
-    }
-
-    ,
+    },
     navbarRightItemStyle: {
         width: 20,
         height: 20,
-        marginRight: 15,
+        marginRight: 15
+
     },
     flatlistStyle: {
         width: width,
 
+
+    },leftViewStyle:{
+
+        flexDirection: 'row',
+        alignItems: 'center'
+
+    },navbarLeftAvatarStyle:{
+        width:30,
+        height:30,
+        marginLeft: 15
 
     }
 });
